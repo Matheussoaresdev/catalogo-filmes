@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catálogo de Filmes — Studio Ghibli</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Catálogo de Filmes Studio Ghibli</h1>
+  </header>
+
+  <main>
+    <section aria-labelledby="controls-title">
+      <h2 id="controls-title" class="visually-hidden">Pesquisa e ordenação</h2>
+      <form id="search-form" role="search">
+        <label for="search-input">Pesquisar por título</label>
+        <input type="search" id="search-input" name="search" autocomplete="off">
+        <button type="submit">Pesquisar</button>
+        <button type="button" id="clear-button">Limpar pesquisa</button>
+
+        <label for="sort-select">Ordenar por</label>
+        <select id="sort-select">
+          <option value="title-asc">Título (A–Z)</option>
+          <option value="year-asc">Ano (mais antigo)</option>
+          <option value="year-desc">Ano (mais recente)</option>
+        </select>
+      </form>
+    </section>
+
+    <p id="status" role="status" aria-live="polite"></p>
+
+    <section aria-labelledby="list-title">
+      <h2 id="list-title" class="visually-hidden">Lista de filmes</h2>
+      <ul id="film-list" class="film-grid"></ul>
+    </section>
+
+    <dialog id="film-dialog" aria-labelledby="dialog-title">
+    
+
+    </dialog>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
