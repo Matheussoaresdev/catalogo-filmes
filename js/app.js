@@ -16,11 +16,15 @@ function setStatus(message) {
   statusEl.textContent = message;
 }
 
+
 function valueOrDefault(value, fallback = 'Não informado') {
-  return value === undefined || value === null || String(value).trim() === ''
-    ? fallback
-    : value;
+  const text = String(value ?? '').trim();
+  const invalid = ['', 'undefined', 'null', 'nan'];
+  return invalid.includes(text.toLowerCase()) ? fallback : text;
 }
+      
+
+
 
 async function loadFilms() {
   setStatus('Carregando filmes...');
@@ -42,25 +46,29 @@ function createFilmCard(film) {
   const li = document.createElement('li');
   li.className = 'film-card';
 
-  const img = document.createElement('img');
-  img.alt = `Pôster do filme ${film.title}`;
-  img.loading = 'lazy';
-  img.src = film.image || '';
-  img.addEventListener('error', () => img.replaceWith(createImagePlaceholder()));
-  if (!film.image) img.replaceWith(createImagePlaceholder());
+  let media;
+  if (film.image) {
+    media = document.createElement('img');
+    media.src = film.image;
+    media.alt = `Pôster do filme ${valueOrDefault(film.title, 'sem título')}`;
+    media.loading = 'lazy';
+    media.addEventListener('error', () => media.replaceWith(createImagePlaceholder()));
+  } else {
+    media = createImagePlaceholder();
+  }
 
   const title = document.createElement('h3');
-  title.textContent = valueOrDefault(film.title);
+  title.textContent = valueOrDefault(film.title, 'Título não informado');
 
   const info = document.createElement('p');
-  info.textContent = `${valueOrDefault(film.release_date, 'Ano não informado')} · ${valueOrDefault(film.director)}`;
+  info.textContent = `${valueOrDefault(film.release_date, 'Ano não informado')} · ${valueOrDefault(film.director, 'Diretor não informado')}`;
 
   const button = document.createElement('button');
   button.type = 'button';
   button.textContent = 'Ver detalhes';
   button.dataset.id = film.id;
 
-  li.append(img, title, info, button);
+  li.append(media, title, info, button);
   return li;
 }
 
@@ -91,21 +99,22 @@ function sortFilms(films, criterion) {
   const sorted = [...films];
 
   switch (criterion) {
+   
     case 'title-asc':
-      sorted.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR'));
-      break;
+        sorted.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'pt-BR'));
+        break;
     case 'title-desc':
-      sorted.sort((a, b) => b.title.localeCompare(a.title, 'pt-BR'));
-      break;
+        sorted.sort((a, b) => (b.title || '').localeCompare(a.title || '', 'pt-BR'));
+        break;
     case 'year-asc':
-      sorted.sort((a, b) => Number(a.release_date) - Number(b.release_date));
-      break;
+        sorted.sort((a, b) => Number(a.release_date) - Number(b.release_date));
+        break;
     case 'year-desc':
-      sorted.sort((a, b) => Number(b.release_date) - Number(a.release_date));
-      break;
+        sorted.sort((a, b) => Number(b.release_date) - Number(a.release_date));
+        break;
     case 'score-desc':
-      sorted.sort((a, b) => Number(b.rt_score) - Number(a.rt_score));
-      break;
+        sorted.sort((a, b) => Number(b.rt_score) - Number(a.rt_score));
+        break;
   }
   return sorted;
 }
@@ -134,7 +143,7 @@ function updateList() {
 
   let films = allFilms;
   if (term !== '') {
-    films = allFilms.filter(film => normalizeText(film.title).includes(term));
+    films = allFilms.filter(film => normalizeText(film.title || '').includes(term));
   }
 
   films = sortFilms(films, sortSelect.value);
@@ -194,7 +203,7 @@ function showDetails(film) {
   if (film.image) {
     const img = document.createElement('img');
     img.src = film.image;
-    img.alt = `Pôster do filme ${film.title}`;
+    img.alt = `Pôster do filme ${valueOrDefault(film.title, 'sem título')}`;
     img.className = 'details-image';
     img.addEventListener('error', () => img.replaceWith(createImagePlaceholder()));
     detailsEl.appendChild(img);
