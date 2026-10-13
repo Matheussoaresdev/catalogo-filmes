@@ -5,6 +5,9 @@ const listEl = document.getElementById('film-list');
 const searchForm = document.getElementById('search-form');
 const searchInput = document.getElementById('search-input');
 const clearButton = document.getElementById('clear-button');
+const dialogEl = document.getElementById('film-dialog');
+const detailsEl = document.getElementById('film-details');
+const closeDialogButton = document.getElementById('close-dialog');
 
 let allFilms = [];
 
@@ -67,6 +70,22 @@ function createImagePlaceholder() {
   return div;
 }
 
+function formatRuntime(value) {
+  const minutes = Number(value);
+  if (!value || Number.isNaN(minutes) || minutes <= 0) {
+    return 'Não informada';
+  }
+  return `${minutes} minutos`;
+}
+
+function formatScore(value) {
+  const score = Number(value);
+  if (!value || Number.isNaN(score)) {
+    return 'Não disponível';
+  }
+  return `${score} / 100`;
+}
+
 function renderFilms(films) {
   listEl.innerHTML = '';
   if (films.length === 0) {
@@ -118,5 +137,73 @@ clearButton.addEventListener('click', () => {
   searchInput.focus();
 });
 
+function createDetailRow(label, value) {
+  const wrapper = document.createElement('div');
+  const dt = document.createElement('dt');
+  const dd = document.createElement('dd');
+  dt.textContent = label;
+  dd.textContent = value;
+  wrapper.append(dt, dd);
+  return wrapper;
+}
+
+function showDetails(film) {
+  detailsEl.innerHTML = '';
+
+
+  const title = document.createElement('h2');
+  title.id = 'dialog-title';
+  title.textContent = valueOrDefault(film.title);
+  detailsEl.appendChild(title);
+
+
+  if (film.original_title && film.original_title !== film.title) {
+    const original = document.createElement('p');
+    original.className = 'original-title';
+    original.textContent = film.original_title;
+    detailsEl.appendChild(original);
+  }
+
+  if (film.image) {
+    const img = document.createElement('img');
+    img.src = film.image;
+    img.alt = `Pôster do filme ${film.title}`;
+    img.className = 'details-image';
+    img.addEventListener('error', () => img.replaceWith(createImagePlaceholder()));
+    detailsEl.appendChild(img);
+  } else {
+    detailsEl.appendChild(createImagePlaceholder());
+  }
+
+
+  const description = document.createElement('p');
+  description.className = 'description';
+  description.textContent = valueOrDefault(film.description, 'Descrição não disponível.');
+  detailsEl.appendChild(description);
+
+
+  const list = document.createElement('dl');
+  list.append(
+    createDetailRow('Diretor', valueOrDefault(film.director)),
+    createDetailRow('Produtor', valueOrDefault(film.producer)),
+    createDetailRow('Ano de lançamento', valueOrDefault(film.release_date)),
+    createDetailRow('Duração', formatRuntime(film.running_time)),
+    createDetailRow('Avaliação', formatScore(film.rt_score))
+  );
+  detailsEl.appendChild(list);
+
+  dialogEl.showModal();
+}
+
+// Delegação de eventos: um só "ouvinte" para todos os botões "Ver detalhes"
+listEl.addEventListener('click', event => {
+  const button = event.target.closest('button[data-id]');
+  if (!button) return;
+
+  const film = allFilms.find(item => item.id === button.dataset.id);
+  if (film) showDetails(film);
+});
+
+closeDialogButton.addEventListener('click', () => dialogEl.close());
 
 loadFilms();

@@ -100,3 +100,26 @@ dialog {
   color: var(--ink);
 }
 dialog::backdrop { background: rgba(43, 42, 38, 0.6); }
+
+#film-details h2 { margin: 0 0 0.25rem; font-size: 1.6rem; }
+.original-title { margin: 0 0 1rem; color: var(--muted); font-style: italic; }
+
+.details-image {
+  display: block;
+  width: min(14rem, 100%);
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  margin: 0 0 1rem;
+  border: 1px solid var(--line);
+}
+#film-details .image-placeholder { width: min(14rem, 100%); margin-bottom: 1rem; }
+
+.description { max-width: 65ch; line-height: 1.6; }
+
+dl { margin: 1rem 0 0; }
+dl div { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; padding: 0.4rem 0; border-top: 1px solid var(--line); }
+dt { font-weight: 600; min-width: 9rem; }
+dd { margin: 0; }
+
+dialog { overflow-y: auto; }
+#close-dialog { margin-top: 1.25rem; }
