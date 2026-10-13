@@ -195,7 +195,6 @@ function showDetails(film) {
   dialogEl.showModal();
 }
 
-// Delegação de eventos: um só "ouvinte" para todos os botões "Ver detalhes"
 listEl.addEventListener('click', event => {
   const button = event.target.closest('button[data-id]');
   if (!button) return;
