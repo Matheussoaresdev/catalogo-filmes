@@ -45,7 +45,8 @@ input[type="search"], select {
   color: var(--ink);
   font: inherit;
 }
-input[type="search"] { min-width: 14rem; flex: 1 1 14rem; }
+input[type="search"] { min-width: 0; }
+img { max-width: 100%; }
 
 button {
   padding: 0.5rem 1rem;
