@@ -1,5 +1,6 @@
 const API_URL = 'https://ghibliapi.vercel.app/films';
 
+const sortSelect = document.getElementById('sort-select');
 const statusEl = document.getElementById('status');
 const listEl = document.getElementById('film-list');
 const searchForm = document.getElementById('search-form');
@@ -29,7 +30,7 @@ async function loadFilms() {
       throw new Error(`Erro HTTP ${response.status}`);
     }
     allFilms = await response.json();
-    renderFilms(allFilms);
+    updateList();
   } catch (error) {
     console.error(error);
     listEl.innerHTML = '';
@@ -86,6 +87,29 @@ function formatScore(value) {
   return `${score} / 100`;
 }
 
+function sortFilms(films, criterion) {
+  const sorted = [...films];
+
+  switch (criterion) {
+    case 'title-asc':
+      sorted.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR'));
+      break;
+    case 'title-desc':
+      sorted.sort((a, b) => b.title.localeCompare(a.title, 'pt-BR'));
+      break;
+    case 'year-asc':
+      sorted.sort((a, b) => Number(a.release_date) - Number(b.release_date));
+      break;
+    case 'year-desc':
+      sorted.sort((a, b) => Number(b.release_date) - Number(a.release_date));
+      break;
+    case 'score-desc':
+      sorted.sort((a, b) => Number(b.rt_score) - Number(a.rt_score));
+      break;
+  }
+  return sorted;
+}
+
 function renderFilms(films) {
   listEl.innerHTML = '';
   if (films.length === 0) {
@@ -104,36 +128,39 @@ function normalizeText(text) {
     .replace(/[\u0300-\u036f]/g, '');
 }
 
-function searchFilms() {
-  const term = normalizeText(searchInput.value.trim());
+function updateList() {
+  const rawTerm = searchInput.value.trim();
+  const term = normalizeText(rawTerm);
 
-  if (term === '') {
-    renderFilms(allFilms);
-    return;
+  let films = allFilms;
+  if (term !== '') {
+    films = allFilms.filter(film => normalizeText(film.title).includes(term));
   }
 
-  const results = allFilms.filter(film =>
-    normalizeText(film.title).includes(term)
-  );
+  films = sortFilms(films, sortSelect.value);
 
-  if (results.length === 0) {
+  if (films.length === 0) {
     listEl.innerHTML = '';
-    setStatus(`Nenhum filme encontrado para "${searchInput.value.trim()}".`);
+    setStatus(`Nenhum filme encontrado para "${rawTerm}".`);
     return;
   }
 
-  renderFilms(results);
-  setStatus(`${results.length} filme(s) encontrado(s) para "${searchInput.value.trim()}".`);
+  renderFilms(films);
+  if (term !== '') {
+    setStatus(`${films.length} filme(s) encontrado(s) para "${rawTerm}".`);
+  }
 }
 
 searchForm.addEventListener('submit', event => {
-  event.preventDefault();   
-  searchFilms();
+  event.preventDefault();
+  updateList();
 });
+
+sortSelect.addEventListener('change', updateList);
 
 clearButton.addEventListener('click', () => {
   searchInput.value = '';
-  renderFilms(allFilms);
+  updateList();
   searchInput.focus();
 });
 
